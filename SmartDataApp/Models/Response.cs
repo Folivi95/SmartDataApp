@@ -5,6 +5,14 @@ namespace SmartDataApp.Models
         public bool success { get; set; }
         public string message { get; set; }
     }
+    
+    public class SuccessResponse<T>
+    {
+        public bool success { get; set; }
+        public string message { get; set; }
+        public T data { get; set; }
+    }
+    
     public static class Response<T>
     {
         public static BaseResponse InternalError(string exceptionMessage)

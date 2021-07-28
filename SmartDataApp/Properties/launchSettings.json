@@ -14,7 +14,10 @@
       "launchBrowser": true,
       "launchUrl": "swagger",
       "environmentVariables": {
-        "ASPNETCORE_ENVIRONMENT": "Development"
+        "ASPNETCORE_ENVIRONMENT": "Development",
+        "ELK_URL": "https://search-smartdata-rgoqpv46oardqiybpu5txkbbjm.us-east-2.es.amazonaws.com",
+        "ELK_USERNAME": "joshuafolivi",
+        "ELK_PASSWORD": "SEun1995$"
       }
     },
     "SmartDataApp": {
@@ -24,7 +27,10 @@
       "launchUrl": "swagger",
       "applicationUrl": "https://localhost:5001;http://localhost:5000",
       "environmentVariables": {
-        "ASPNETCORE_ENVIRONMENT": "Development"
+        "ASPNETCORE_ENVIRONMENT": "Development",
+        "ELK_URL": "https://search-smartdata-rgoqpv46oardqiybpu5txkbbjm.us-east-2.es.amazonaws.com",
+        "ELK_USERNAME": "joshuafolivi",
+        "ELK_PASSWORD": "SEun1995$"
       }
     }
   }
