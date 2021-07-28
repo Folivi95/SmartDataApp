@@ -20,10 +20,50 @@ namespace SmartDataApp.Controllers
             _elasticSearchService = elasticSearchService ?? throw new ArgumentNullException(nameof(elasticSearchService));
         }
 
-        [HttpGet]
-        public async Task<ActionResult> Get([FromQuery]string searchPhrase, string market, int limit, ResourceParameters parameters)
+        [HttpGet("properties", Name = "GetProperties")]
+        public async Task<IActionResult> GetProperties([FromQuery]string searchPhrase, List<string> market, 
+            int limit, ResourceParameters parameters)
         {
-            throw new NotImplementedException();
+            try
+            {
+                if (limit == 0)
+                {
+                    limit = 25;
+                }
+                
+                var response = await _elasticSearchService.GetPropertiesData(parameters, searchPhrase, market, 
+                    nameof(GetProperties), Url, limit);
+
+                return Ok(response);
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
+                return StatusCode(500, Response<string>.InternalError(e.Message));
+            }
+        }
+        
+        [HttpGet("mgmt", Name = "GetMgmt")]
+        public async Task<IActionResult> GetMgmt([FromQuery]string searchPhrase, List<string> market, 
+        int limit, ResourceParameters parameters)
+        {
+            try
+            {
+                if (limit == 0)
+                {
+                    limit = 25;
+                }
+                
+                var response = await _elasticSearchService.GetMgmtData(parameters, searchPhrase, market, 
+                    nameof(GetMgmt), Url, limit);
+
+                return Ok(response);
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
+                return StatusCode(500, Response<string>.InternalError(e.Message));
+            }
         }
     }
 }

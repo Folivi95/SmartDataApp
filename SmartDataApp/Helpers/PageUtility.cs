@@ -15,8 +15,7 @@ namespace SmartDataApp.Helpers
                 ? CreateResourceUri(parameters, name, ResourceUriType.NextPage, helper)
                 : null;
             var currentLink = CreateResourceUri(parameters, name, ResourceUriType.CurrentPage, helper);
-
-
+            
             var pagination = new Pagination
             {
                 currentPage = currentLink,

@@ -1,6 +1,9 @@
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
+using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Nest;
 using SmartDataApp.Helpers;
@@ -28,32 +31,46 @@ namespace SmartDataApp.Services
             _client = new ElasticClient(connectionSettings);
         }
 
-        public async Task<PagedResponse<PropertiesDto>> GetPropertiesData(ResourceParameters parameters, string searchPhrase, 
-            List<string> market, int limit = 25)
+        public async Task<PagedResponse<ISearchResponse<PropertiesDto>>> GetPropertiesData(
+            ResourceParameters parameters, string searchPhrase,
+            List<string> market, string controllerName, IUrlHelper urlHelper, int limit = 25)
         {
-            try
-            {
-                List<string> searchItems = searchPhrase.ContainsKeywords();
+            List<string> searchItems = searchPhrase.ContainsKeywords();
 
-                var searchResponse = await _client.SearchAsync<PropertiesDto>(p => p
-                    .Query(q =>
-                        q.MatchAny("name", searchItems) ||
-                        q.MatchAny("market", market)
-                    )
-                    .Size(limit)
-                );
+            var searchResponse = await _client.SearchAsync<PropertiesDto>(p => p
+                .Query(q =>
+                    q.MatchAny("name", searchItems) ||
+                    q.MatchAny("market", market)
+                )
+                .Size(limit)
+            );
 
-                return null;
-            }
-            catch (Exception e)
+            var queryData = searchResponse.Documents as IQueryable<ReadOnlyCollection<PropertiesDto>>;
+            var pagedData = await PagedList<ReadOnlyCollection<PropertiesDto>>.Create(queryData,
+                parameters.PageNumber, parameters.PageSize);
+
+            var paginationData = PageUtility<ReadOnlyCollection<PropertiesDto>>
+                .CreateResourcePageUrl(parameters, controllerName, pagedData, urlHelper);
+
+            var meta = new Meta()
             {
-                Console.WriteLine(e);
-                return null;
-            }
+                pagination = paginationData
+            };
+
+            var response = new PagedResponse<ISearchResponse<PropertiesDto>>()
+            {
+                success = true,
+                message = "Properties data retrieved successfully",
+                data = searchResponse,
+                meta = meta
+            };
+
+            return response;
         }
 
-        public async Task<PagedResponse<MgmtDto>> GetMgmtData(ResourceParameters parameters, string searchPhrase, 
-            List<string> market, int limit = 25)
+        public async Task<PagedResponse<ISearchResponse<MgmtDto>>> GetMgmtData(ResourceParameters parameters,
+            string searchPhrase,
+            List<string> market, string controllerName, IUrlHelper url, int limit = 25)
         {
             try
             {
