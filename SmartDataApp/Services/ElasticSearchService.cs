@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Threading.Tasks;
+using Elasticsearch.Net;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Nest;
@@ -21,17 +22,30 @@ namespace SmartDataApp.Services
         public ElasticSearchService(IConfiguration configuration)
         {
             _configuration = configuration ?? throw new ArgumentNullException(nameof(configuration));
-            var connectionSettings = new ConnectionSettings()
-                .BasicAuthentication(Environment.GetEnvironmentVariable("ELK_USERNAME"),
-                    Environment.GetEnvironmentVariable("ELK_PASSWORD"))
-                .EnableDebugMode()
-                .PrettyJson()
-                .RequestTimeout(TimeSpan.FromMinutes(2));
+            string uriString = Environment.GetEnvironmentVariable("ELK_URL");
+            string userName = Environment.GetEnvironmentVariable("ELK_USERNAME");
+            string password = Environment.GetEnvironmentVariable("ELK_PASSWORD");
+             var connectionSettings = new ConnectionSettings(new Uri(uriString!))
+                 .BasicAuthentication(userName, password)
+                 .DefaultIndex("mgmt")
+                 .DefaultMappingFor<PropertiesDto>(i => 
+                     i.IndexName("properties"))
+                 .DefaultMappingFor<MgmtDto>(i =>
+                     i.IndexName("mgmt"))
+                 .EnableDebugMode()
+                 .PrettyJson()
+                 .RequestTimeout(TimeSpan.FromMinutes(2));
 
             _client = new ElasticClient(connectionSettings);
+
+            // var settings = new ConnectionConfiguration(new Uri(uriString!))
+            //     .BasicAuthentication(userName, password)
+            //     .RequestTimeout(TimeSpan.FromMinutes(2));
+            //
+            // _client = new ElasticLowLevelClient(settings);
         }
 
-        public async Task<PagedResponse<ISearchResponse<PropertiesDto>>> GetPropertiesData(
+        public async Task<PagedResponse<List<PropertiesDto>>> GetPropertiesData(
             ResourceParameters parameters, string searchPhrase,
             List<string> market, string controllerName, IUrlHelper urlHelper, int limit = 25)
         {
@@ -39,17 +53,19 @@ namespace SmartDataApp.Services
 
             var searchResponse = await _client.SearchAsync<PropertiesDto>(p => p
                 .Query(q =>
-                    q.MatchAny("name", searchItems) ||
-                    q.MatchAny("market", market)
+                    q.Bool(b => 
+                        b.Should(
+                            bs => bs.MatchAny("name", searchItems),
+                            bs => bs.MatchAny("market", market)))
                 )
                 .Size(limit)
             );
 
-            var queryData = searchResponse.Documents as IQueryable<ReadOnlyCollection<PropertiesDto>>;
-            var pagedData = await PagedList<ReadOnlyCollection<PropertiesDto>>.Create(queryData,
+            var queryData = searchResponse.Documents.ToList();
+            var pagedData = await PagedList<PropertiesDto>.Create(queryData,
                 parameters.PageNumber, parameters.PageSize);
 
-            var paginationData = PageUtility<ReadOnlyCollection<PropertiesDto>>
+            var paginationData = PageUtility<PropertiesDto>
                 .CreateResourcePageUrl(parameters, controllerName, pagedData, urlHelper);
 
             var meta = new Meta()
@@ -57,41 +73,52 @@ namespace SmartDataApp.Services
                 pagination = paginationData
             };
 
-            var response = new PagedResponse<ISearchResponse<PropertiesDto>>()
+            var response = new PagedResponse<List<PropertiesDto>>
             {
                 success = true,
                 message = "Properties data retrieved successfully",
-                data = searchResponse,
+                data = pagedData,
                 meta = meta
             };
 
             return response;
         }
 
-        public async Task<PagedResponse<ISearchResponse<MgmtDto>>> GetMgmtData(ResourceParameters parameters,
+        public async Task<PagedResponse<List<MgmtDto>>> GetMgmtData(ResourceParameters parameters,
             string searchPhrase,
-            List<string> market, string controllerName, IUrlHelper url, int limit = 25)
+            List<string> market, string controllerName, IUrlHelper urlHelper, int limit = 25)
         {
-            try
-            {
-                // checck search phrase for keywords
-                List<string> searchItems = searchPhrase.ContainsKeywords();
+            List<string> searchItems = searchPhrase.ContainsKeywords();
 
-                var searchResponse = await _client.SearchAsync<PropertiesDto>(p => p
-                    .Query(q =>
-                        q.MatchAny("name", searchItems) ||
-                        q.MatchAny("market", market)
-                    )
-                    .Size(limit)
-                );
+            var searchResponse = await _client.SearchAsync<MgmtDto>(p => p
+                .Query(q =>
+                    q.MatchAny("name", searchItems) ||
+                    q.MatchAny("market", market)
+                )
+                .Size(limit)
+            );
 
-                return null;
-            }
-            catch (Exception e)
+            var queryData = searchResponse.Documents.ToList();
+            var pagedData = await PagedList<MgmtDto>.Create(queryData,
+                parameters.PageNumber, parameters.PageSize);
+
+            var paginationData = PageUtility<MgmtDto>
+                .CreateResourcePageUrl(parameters, controllerName, pagedData, urlHelper);
+
+            var meta = new Meta()
             {
-                Console.WriteLine(e);
-                return null;
-            }
+                pagination = paginationData
+            };
+
+            var response = new PagedResponse<List<MgmtDto>>()
+            {
+                success = true,
+                message = "Properties data retrieved successfully",
+                data = pagedData,
+                meta = meta
+            };
+
+            return response;
         }
     }
 }

@@ -9,9 +9,9 @@ namespace SmartDataApp.Interfaces
 {
     public interface IElasticSearchService
     {
-        Task<PagedResponse<ISearchResponse<PropertiesDto>>> GetPropertiesData(ResourceParameters parameters, string searchPhrase, 
+        Task<PagedResponse<List<PropertiesDto>>> GetPropertiesData(ResourceParameters parameters, string searchPhrase, 
             List<string> market, string controllerName, IUrlHelper urlHelper, int limit = 25);
-        Task<PagedResponse<ISearchResponse<MgmtDto>>> GetMgmtData(ResourceParameters parameters, string searchPhrase, 
+        Task<PagedResponse<List<MgmtDto>>> GetMgmtData(ResourceParameters parameters, string searchPhrase, 
             List<string> market, string controllerName, IUrlHelper urlHelper, int limit = 25 );
     }
 }

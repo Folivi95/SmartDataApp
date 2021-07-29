@@ -24,14 +24,14 @@ namespace SmartDataApp.Helpers
             AddRange(items);
         }
 
-        public static async Task<PagedList<T>> Create(IQueryable<T> source, int pageNumber, int pageSize)
+        public static async Task<PagedList<T>> Create(List<T> source, int pageNumber, int pageSize)
         {
             var count = source.Count();
             if (pageSize == 0)
             {
                 pageSize = count;
             }
-            var items = await source.Skip(((pageNumber - 1) * pageSize)).Take(pageSize).ToListAsync();
+            var items = source.Skip(((pageNumber - 1) * pageSize)).Take(pageSize).ToList();
             return new PagedList<T>(items, count, pageNumber, pageSize);
         }
     }

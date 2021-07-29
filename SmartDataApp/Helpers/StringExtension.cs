@@ -8,12 +8,12 @@ namespace SmartDataApp.Helpers
     {
         public static List<string> ContainsKeywords(this string word)
         {
-            List<string> result = null;
-            word = word.ToUpper().Replace(" ", "");
+            List<string> result = new List<string>();
+            word = word.ToLower().Replace(" ", "");
 
-            if (word.Contains(StopWordEnum.AND.ToString()))
+            if (word.Contains(StopWordEnum.AND.ToString().ToLower()))
             {
-                result = word.Split(StopWordEnum.AND.ToString(), StringSplitOptions.RemoveEmptyEntries).ToList();
+                result = word.Split(StopWordEnum.AND.ToString().ToLower(), StringSplitOptions.RemoveEmptyEntries).ToList();
 
                 for (int i = 0; i < result.Count; i++)
                 {
@@ -36,9 +36,9 @@ namespace SmartDataApp.Helpers
                 return result;
             }
 
-            if (word.Contains(StopWordEnum.OR.ToString()))
+            if (word.Contains(StopWordEnum.OR.ToString().ToLower()))
             {
-                result = word.Split(StopWordEnum.OR.ToString(), StringSplitOptions.RemoveEmptyEntries).ToList();
+                result = word.Split(StopWordEnum.OR.ToString().ToLower(), StringSplitOptions.RemoveEmptyEntries).ToList();
                 
                 for (int i = 0; i < result.Count; i++)
                 {
@@ -61,9 +61,9 @@ namespace SmartDataApp.Helpers
                 return result;
             }
 
-            if (word.Contains(StopWordEnum.THE.ToString()))
+            if (word.Contains(StopWordEnum.THE.ToString().ToLower()))
             {
-                result = word.Split(StopWordEnum.THE.ToString(), StringSplitOptions.RemoveEmptyEntries).ToList();
+                result = word.Split(StopWordEnum.THE.ToString().ToLower(), StringSplitOptions.RemoveEmptyEntries).ToList();
                 
                 for (int i = 0; i < result.Count; i++)
                 {
@@ -86,9 +86,9 @@ namespace SmartDataApp.Helpers
                 return result;
             }
 
-            if (word.Contains(StopWordEnum.INTO.ToString()))
+            if (word.Contains(StopWordEnum.INTO.ToString().ToLower()))
             {
-                result = word.Split(StopWordEnum.INTO.ToString(), StringSplitOptions.RemoveEmptyEntries).ToList();
+                result = word.Split(StopWordEnum.INTO.ToString().ToLower(), StringSplitOptions.RemoveEmptyEntries).ToList();
                 
                 for (int i = 0; i < result.Count; i++)
                 {
@@ -110,8 +110,9 @@ namespace SmartDataApp.Helpers
 
                 return result;
             }
-
-            return null;
+            
+            result.Add(word);
+            return result;
         }
     }
 }

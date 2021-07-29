@@ -21,8 +21,8 @@ namespace SmartDataApp.Controllers
         }
 
         [HttpGet("properties", Name = "GetProperties")]
-        public async Task<IActionResult> GetProperties([FromQuery]string searchPhrase, List<string> market, 
-            int limit, ResourceParameters parameters)
+        public async Task<IActionResult> GetProperties([FromQuery]string searchPhrase,[FromQuery] List<string> market, 
+           [FromQuery] int limit, [FromQuery] ResourceParameters parameters)
         {
             try
             {
@@ -44,8 +44,8 @@ namespace SmartDataApp.Controllers
         }
         
         [HttpGet("mgmt", Name = "GetMgmt")]
-        public async Task<IActionResult> GetMgmt([FromQuery]string searchPhrase, List<string> market, 
-        int limit, ResourceParameters parameters)
+        public async Task<IActionResult> GetMgmt([FromQuery]string searchPhrase, [FromQuery] List<string> market, 
+            [FromQuery] int limit, [FromQuery] ResourceParameters parameters)
         {
             try
             {
