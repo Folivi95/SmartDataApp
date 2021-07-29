@@ -56,6 +56,9 @@ namespace SmartDataApp.Services
                     q.Bool(b => 
                         b.Should(
                             bs => bs.MatchAny("name", searchItems),
+                            bs => bs.MatchAny("streetAddress", searchItems),
+                            bs => bs.MatchAny("city", searchItems),
+                            bs => bs.MatchAny("state", searchItems),
                             bs => bs.MatchAny("market", market)))
                 )
                 .Size(limit)
@@ -92,8 +95,10 @@ namespace SmartDataApp.Services
 
             var searchResponse = await _client.SearchAsync<MgmtDto>(p => p
                 .Query(q =>
-                    q.MatchAny("name", searchItems) ||
-                    q.MatchAny("market", market)
+                    q.Bool(b => 
+                        b.Should(
+                            bs => bs.MatchAny("name", searchItems),
+                            bs => bs.MatchAny("market", market)))
                 )
                 .Size(limit)
             );
